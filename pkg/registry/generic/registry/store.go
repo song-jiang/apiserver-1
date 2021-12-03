@@ -512,10 +512,12 @@ func (e *Store) Update(ctx context.Context, name string, objInfo rest.UpdatedObj
 	var deleteObj runtime.Object
 	err = e.Storage.GuaranteedUpdate(ctx, key, out, true, storagePreconditions, func(existing runtime.Object, res storage.ResponseMeta) (runtime.Object, *uint64, error) {
 		existingResourceVersion, err := e.Storage.Versioner().ObjectResourceVersion(existing)
+		klog.V(5).Infof("Song userUpgrade key: %v , existingVersion %v, err %v", key, existingResourceVersion, err)
 		if err != nil {
 			return nil, nil, err
 		}
 		if existingResourceVersion == 0 {
+			klog.V(5).Infof("Song userUpgrade key: %v, forceAllowCreate %t, AllowCreate %t", key, forceAllowCreate, e.UpdateStrategy.AllowCreateOnUpdate())
 			if !e.UpdateStrategy.AllowCreateOnUpdate() && !forceAllowCreate {
 				return nil, nil, apierrors.NewNotFound(qualifiedResource, name)
 			}

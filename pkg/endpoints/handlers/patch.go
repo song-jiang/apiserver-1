@@ -50,6 +50,8 @@ import (
 	"k8s.io/apiserver/pkg/util/dryrun"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	utiltrace "k8s.io/utils/trace"
+
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -575,6 +577,7 @@ func (p *patcher) patchResource(ctx context.Context, scope *RequestScope) (runti
 	default:
 		return nil, false, fmt.Errorf("%v: unimplemented patch type", p.patchType)
 	}
+	klog.V(5).Infof("Song patchResource with ApplyPatchType %s, name %s, forceAllowCreate %t", p.patchType, p.name, p.forceAllowCreate)
 	dedupOwnerReferencesTransformer := func(_ context.Context, obj, _ runtime.Object) (runtime.Object, error) {
 		// Dedup owner references after mutating admission happens
 		dedupOwnerReferencesAndAddWarning(obj, ctx, true)
