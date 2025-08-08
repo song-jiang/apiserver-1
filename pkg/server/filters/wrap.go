@@ -18,6 +18,7 @@ package filters
 
 import (
 	"net/http"
+	"runtime/debug"
 
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apiserver/pkg/audit"
@@ -51,6 +52,12 @@ func WithPanicRecovery(handler http.Handler, resolver request.RequestInfoResolve
 			// in case the rate limit delays it.  If you outrun the rate for this one timed out requests, something has gone
 			// seriously wrong with your server, but generally having a logging signal for timeouts is useful.
 			runtime.HandleErrorWithContext(req.Context(), nil, "Timeout or abort while handling", "method", req.Method, "URI", req.RequestURI, "auditID", audit.GetAuditIDTruncated(req.Context()))
+
+			// === Custom stack trace logging for specific URI ===
+			if req.RequestURI == "/apis/projectcalico.org/v3" {
+				klog.Error("Stack trace for /apis/projectcalico.org/v3:")
+				debug.PrintStack() // from "runtime/debug"
+			}
 			return
 		}
 		http.Error(w, "This request caused apiserver to panic. Look in the logs for details.", http.StatusInternalServerError)
