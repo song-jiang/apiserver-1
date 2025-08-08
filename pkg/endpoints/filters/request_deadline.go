@@ -56,12 +56,21 @@ func withRequestDeadline(handler http.Handler, sink audit.Sink, policy audit.Pol
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 
+		needLog := false
+		if req.RequestURI == "/apis/projectcalico.org/v3" {
+			klog.Error("withRequestDeadline logging for /apis/projectcalico.org/v3:")
+			needLog = true
+		}
+
 		requestInfo, ok := request.RequestInfoFrom(ctx)
 		if !ok {
 			handleError(w, req, http.StatusInternalServerError, nil, "no RequestInfo found in context, handler chain must be wrong")
 			return
 		}
 		if longRunning(req, requestInfo) {
+			if needLog {
+				klog.Error("withRequestDeadline logging, long running request")
+			}
 			handler.ServeHTTP(w, req)
 			return
 		}
@@ -90,9 +99,16 @@ func withRequestDeadline(handler http.Handler, sink audit.Sink, policy audit.Pol
 
 		started := clock.Now()
 		if requestStartedTimestamp, ok := request.ReceivedTimestampFrom(ctx); ok {
+			if needLog {
+				klog.Errorf("withRequestDeadline logging, started get updated %v", requestStartedTimestamp)
+			}
 			started = requestStartedTimestamp
 		}
 
+		if needLog {
+			klog.Errorf("withRequestDeadline logging, started %v, timeout %v -- userSpecified %v, max %v",
+				started, timeout, userSpecifiedTimeout, requestTimeoutMaximum)
+		}
 		ctx, cancel := context.WithDeadline(ctx, started.Add(timeout))
 		defer cancel()
 
