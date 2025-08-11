@@ -18,7 +18,6 @@ package filters
 
 import (
 	"net/http"
-	"runtime/debug"
 
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apiserver/pkg/audit"
@@ -56,7 +55,7 @@ func WithPanicRecovery(handler http.Handler, resolver request.RequestInfoResolve
 			// === Custom stack trace logging for specific URI ===
 			if req.RequestURI == "/apis/projectcalico.org/v3" {
 				klog.Error("Song01 Stack trace for /apis/projectcalico.org/v3:")
-				debug.PrintStack() // from "runtime/debug"
+				// debug.PrintStack() // from "runtime/debug"
 			}
 			return
 		}

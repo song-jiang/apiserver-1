@@ -58,7 +58,7 @@ func withRequestDeadline(handler http.Handler, sink audit.Sink, policy audit.Pol
 
 		needLog := false
 		if req.RequestURI == "/apis/projectcalico.org/v3" {
-			klog.Error("withRequestDeadline logging for /apis/projectcalico.org/v3:")
+			klog.Errorf("withRequestDeadline logging for /apis/projectcalico.org/v3: auditID %v", audit.GetAuditIDTruncated(req.Context()))
 			needLog = true
 		}
 
@@ -124,6 +124,10 @@ func withFailedRequestAudit(failedHandler http.Handler, statusErr *apierrors.Sta
 		return failedHandler
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.RequestURI == "/apis/projectcalico.org/v3" {
+			klog.Errorf("withRequestDeadline failed audit logging for /apis/projectcalico.org/v3: auditID %v", audit.GetAuditIDTruncated(req.Context()))
+		}
+
 		ac, err := evaluatePolicyAndCreateAuditEvent(req, policy)
 		if err != nil {
 			utilruntime.HandleError(fmt.Errorf("failed to create audit event: %v", err))
