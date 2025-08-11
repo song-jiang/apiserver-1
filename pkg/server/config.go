@@ -846,7 +846,7 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 	}
 
 	// if c.FeatureGate.Enabled(genericfeatures.AggregatedDiscoveryEndpoint) {
-	klog.Error("Song: Enable AggregateDiscoveryManager by default")
+	klog.Error("Song: Enable AggregateDiscoveryManager by default, V1")
 	manager := c.AggregatedDiscoveryGroupManager
 	if manager == nil {
 		manager = discoveryendpoint.NewResourceManager("apis")

@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/endpoints/handlers/negotiation"
 	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
+	"k8s.io/klog/v2"
 )
 
 // APIGroupHandler creates a webservice serving the supported versions, preferred version, and name
@@ -42,6 +43,8 @@ func NewAPIGroupHandler(serializer runtime.NegotiatedSerializer, group metav1.AP
 		// response backwards compatible.
 		serializer = stripVersionNegotiatedSerializer{serializer}
 	}
+
+	klog.Errorf("Song: New API Ground handler %v", group)
 
 	return &APIGroupHandler{
 		serializer: serializer,
@@ -69,5 +72,6 @@ func (s *APIGroupHandler) handle(req *restful.Request, resp *restful.Response) {
 }
 
 func (s *APIGroupHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	klog.Errorf("Song: APIGroupHandler process req %v and return %v", req.RequestURI, &s.group)
 	responsewriters.WriteObjectNegotiated(s.serializer, negotiation.DefaultEndpointRestrictions, schema.GroupVersion{}, w, req, http.StatusOK, &s.group, false)
 }
