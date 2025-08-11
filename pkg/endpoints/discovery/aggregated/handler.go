@@ -522,6 +522,8 @@ func (rdm *resourceDiscoveryManager) serveHTTP(resp http.ResponseWriter, req *ht
 	response := cache.cachedResponse
 	etag := cache.cachedResponseETag
 
+	klog.Errorf("Song: RDM process req %v", req.RequestURI)
+
 	mediaType, _, err := negotiation.NegotiateOutputMediaType(req, rdm.serializer, DiscoveryEndpointRestrictions)
 	if err != nil {
 		// Should never happen. wrapper.go will only proxy requests to this
@@ -541,6 +543,8 @@ func (rdm *resourceDiscoveryManager) serveHTTP(resp http.ResponseWriter, req *ht
 	targetGV = mediaType.Convert.GroupVersion()
 
 	if len(etag) > 0 {
+		klog.Errorf("Song: RDM write back response with etag %v", response)
+
 		// Use proper e-tag headers if one is available
 		ServeHTTPWithETag(
 			&response,
@@ -551,6 +555,8 @@ func (rdm *resourceDiscoveryManager) serveHTTP(resp http.ResponseWriter, req *ht
 			req,
 		)
 	} else {
+		klog.Errorf("Song: RDM write back normal response %v", response)
+
 		// Default to normal response in rare case etag is
 		// not cached with the object for some reason.
 		responsewriters.WriteObjectNegotiated(

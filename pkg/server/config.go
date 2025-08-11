@@ -845,14 +845,15 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 		muxAndDiscoveryCompleteSignals: map[string]<-chan struct{}{},
 	}
 
-	if c.FeatureGate.Enabled(genericfeatures.AggregatedDiscoveryEndpoint) {
-		manager := c.AggregatedDiscoveryGroupManager
-		if manager == nil {
-			manager = discoveryendpoint.NewResourceManager("apis")
-		}
-		s.AggregatedDiscoveryGroupManager = manager
-		s.AggregatedLegacyDiscoveryGroupManager = discoveryendpoint.NewResourceManager("api")
+	// if c.FeatureGate.Enabled(genericfeatures.AggregatedDiscoveryEndpoint) {
+	klog.Error("Song: Enable AggregateDiscoveryManager by default")
+	manager := c.AggregatedDiscoveryGroupManager
+	if manager == nil {
+		manager = discoveryendpoint.NewResourceManager("apis")
 	}
+	s.AggregatedDiscoveryGroupManager = manager
+	s.AggregatedLegacyDiscoveryGroupManager = discoveryendpoint.NewResourceManager("api")
+	//}
 	for {
 		if c.JSONPatchMaxCopyBytes <= 0 {
 			break
