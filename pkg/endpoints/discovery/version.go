@@ -24,8 +24,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apiserver/pkg/audit"
 	"k8s.io/apiserver/pkg/endpoints/handlers/negotiation"
 	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
+	"k8s.io/klog/v2"
 )
 
 type APIResourceLister interface {
@@ -55,6 +57,8 @@ func NewAPIVersionHandler(serializer runtime.NegotiatedSerializer, groupVersion 
 		serializer = stripVersionNegotiatedSerializer{serializer}
 	}
 
+	klog.Errorf("Song: New API Version handler %v", groupVersion)
+
 	return &APIVersionHandler{
 		serializer:        serializer,
 		groupVersion:      groupVersion,
@@ -78,6 +82,8 @@ func (s *APIVersionHandler) handle(req *restful.Request, resp *restful.Response)
 }
 
 func (s *APIVersionHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	klog.Errorf("Song: APIVersionHandler process req %v auditID %v and return %v",
+		req.RequestURI, audit.GetAuditIDTruncated(req.Context()), &metav1.APIResourceList{GroupVersion: s.groupVersion.String(), APIResources: s.apiResourceLister.ListAPIResources()})
 	responsewriters.WriteObjectNegotiated(s.serializer, negotiation.DefaultEndpointRestrictions, schema.GroupVersion{}, w, req, http.StatusOK,
 		&metav1.APIResourceList{GroupVersion: s.groupVersion.String(), APIResources: s.apiResourceLister.ListAPIResources()}, false)
 }

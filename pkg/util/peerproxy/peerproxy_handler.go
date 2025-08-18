@@ -28,6 +28,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"k8s.io/api/apiserverinternal/v1alpha1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -244,6 +245,17 @@ func (h *peerProxyHandler) proxyRequestToDestinationAPIServer(req *http.Request,
 		return
 	}
 
+	klog.Errorf("Song: Proxying request for URI: %s, User %v", req.URL.String(), user)
+
+	if req.URL.Path == "/apis/projectcalico.org/v3" {
+		ctx := req.Context()
+		if deadline, ok := ctx.Deadline(); ok {
+			timeout := time.Until(deadline)
+			klog.Infof("Song: MATCHED_URI ==> Request context has a timeout of: %s", timeout)
+		} else {
+			klog.Info("Song: MATCHED_URI ==> Request context has no timeout set.")
+		}
+	}
 	// write a new location based on the existing request pointed at the target service
 	location := &url.URL{}
 	location.Scheme = "https"
