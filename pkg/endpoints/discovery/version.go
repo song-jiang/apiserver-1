@@ -82,8 +82,8 @@ func (s *APIVersionHandler) handle(req *restful.Request, resp *restful.Response)
 }
 
 func (s *APIVersionHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	klog.Errorf("Song: APIVersionHandler process req %v auditID %v and return %v",
-		req.RequestURI, audit.GetAuditIDTruncated(req.Context()), &metav1.APIResourceList{GroupVersion: s.groupVersion.String(), APIResources: s.apiResourceLister.ListAPIResources()})
+	klog.Errorf("Song: APIVersionHandler process req %v auditID %v and return 200",
+		req.RequestURI, audit.GetAuditIDTruncated(req.Context()))
 	responsewriters.WriteObjectNegotiated(s.serializer, negotiation.DefaultEndpointRestrictions, schema.GroupVersion{}, w, req, http.StatusOK,
 		&metav1.APIResourceList{GroupVersion: s.groupVersion.String(), APIResources: s.apiResourceLister.ListAPIResources()}, false)
 }
